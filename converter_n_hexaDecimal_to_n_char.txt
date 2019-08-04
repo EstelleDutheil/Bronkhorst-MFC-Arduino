@@ -1,0 +1,147 @@
+/* Send a request to MFC and get it as "port_com-tram" does
+Seperate the usefull part of the tram with "R.substring(13,34)" function
+Convert the obtained substring with "conv_n_hexa_en_n_char" function
+ */
+ 
+#include <SoftwareSerial.h>
+
+SoftwareSerial monPort=SoftwareSerial(8,7);
+
+String BHT_model_number_91=":078004716271620F\r\n";
+String R;
+String hexaList;
+String maPhrase;
+int int15;
+int int0;
+int nbre;
+char caractere;
+
+void setup() {
+  Serial.begin(9600);
+  monPort.begin(38400);
+}
+
+void loop() {
+  monPort.print(BHT_model_number_91);
+  R = monPort.readStringUntil('\n');
+  Serial.println(R);
+  Serial.println(R.substring(13,34));
+  hexaList=R.substring(13,34);
+  maPhrase=conv_n_hexa_en_n_char(hexaList);
+  Serial.println(maPhrase);
+  while (true) {
+  }  
+}
+
+String conv_n_hexa_en_n_char(String hexaList){
+  unsigned int longueurPhrase=hexaList.length();
+  for(int i=0;i<longueurPhrase;++i){
+    if(i%2==0){
+      if(hexaList[i]=='0'){
+        int15=0;
+      }
+      if(hexaList[i+1]=='0'){
+        int0=0;
+      }
+      if(hexaList[i]=='1'){
+        int15=1;
+      }
+      if(hexaList[i+1]=='1'){
+        int0=1;
+      }
+      if(hexaList[i]=='2'){
+        int15=2;
+      }
+      if(hexaList[i+1]=='2'){
+        int0=2;
+      }
+      if(hexaList[i]=='3'){
+        int15=3;
+      }
+      if(hexaList[i+1]=='3'){
+        int0=3;
+      }
+      if(hexaList[i]=='4'){
+        int15=4;
+      }
+      if(hexaList[i+1]=='4'){
+        int0=4;
+      }
+      if(hexaList[i]=='5'){
+        int15=5;
+      }
+      if(hexaList[i+1]=='5'){
+        int0=5;
+      }
+      if(hexaList[i]=='6'){
+        int15=6;
+      }
+      if(hexaList[i+1]=='6'){
+        int0=6;
+      }
+      if(hexaList[i]=='7'){
+        int15=7;
+      }
+      if(hexaList[i+1]=='7'){
+        int0=7;
+      }
+      if(hexaList[i]=='8'){
+        int15=8;
+      }
+      if(hexaList[i+1]=='8'){
+        int0=8;
+      }
+      if(hexaList[i]=='9'){
+        int15=9;
+      }
+      if(hexaList[i+1]=='9'){
+        int0=9;
+      }
+      if(hexaList[i]=='A'){
+        int15=10;
+      }
+      if(hexaList[i+1]=='A'){
+        int0=10;
+      }
+      if(hexaList[i]=='B'){
+        int15=11;
+      }
+      if(hexaList[i+1]=='B'){
+        int0=11;
+      }
+      if(hexaList[i]=='C'){
+        int15=12;
+      }
+      if(hexaList[i+1]=='C'){
+        int0=12;
+      }
+      if(hexaList[i]=='D'){
+        int15=13;
+      }
+      if(hexaList[i+1]=='D'){
+        int0=13;
+      }
+      if(hexaList[i]=='E'){
+        int15=14;
+      }
+      if(hexaList[i+1]=='E'){
+        int0=14;
+      }
+      if(hexaList[i]=='F'){
+        int15=15;
+      }
+      if(hexaList[i+1]=='F'){
+        int0=15;
+      }
+      nbre=(int15*16)+int0;
+      caractere=char(nbre);
+      maPhrase=maPhrase+caractere;
+    }
+  }
+  return(maPhrase);
+    }
+
+/*Answer on Arduino's serial monitor:
+:14B00271620F462D32303143562D41414100414144
+462D32303143562D414141
+F-201CV-AAA */

@@ -1,0 +1,133 @@
+/* Send a request to MFC and get it as "port_com_tram" does
+Separate the usefull part of the tram, made of 4 hexaDecimal
+Convert the obtained substring with "conv_4hexa_en_1float" function.
+ */
+
+#include <SoftwareSerial.h>
+
+SoftwareSerial monPort=SoftwareSerial(8,7);
+
+String Capacity_21=":068004014D014D\r\n";
+String R;
+String hexa4;
+float maValeur;
+float number;
+
+void setup() {
+  Serial.begin(9600);
+  monPort.begin(38400);
+}
+
+void loop() {
+  monPort.print(Capacity_21);
+  R=monPort.readStringUntil('\n');
+  Serial.println(R);
+  Serial.println(R.substring(11,19));
+  hexa4=R.substring(11,19);
+  maValeur=conv_4hexa_en_1float(hexa4);
+  Serial.println(maValeur);
+  while(true){
+  }
+}
+
+float conv_4hexa_en_1float(String hexa4){
+  String hexaNbre[]={"00","00","00","00"};
+  hexaNbre[0]=hexa4.substring(0,2);
+  hexaNbre[1]=hexa4.substring(2,4);
+  hexaNbre[2]=hexa4.substring(4,6);
+  hexaNbre[3]=hexa4.substring(6,8);
+  int hexaInt[]={0,0,0,0};
+  int hexaInter=0;
+  int trant[]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  for(int i=0;i<4;++i){
+    for(int j=0;j<2;++j){
+      if(hexaNbre[i][j]=='0'){
+        hexaInter=0;
+      }
+      if(hexaNbre[i][j]=='1'){
+        hexaInter=1;
+      }
+      if(hexaNbre[i][j]=='2'){
+        hexaInter=2;
+      }
+      if(hexaNbre[i][j]=='3'){
+        hexaInter=3;
+      }
+      if(hexaNbre[i][j]=='4'){
+        hexaInter=4;
+      }
+      if(hexaNbre[i][j]=='5'){
+        hexaInter=5;
+      }
+      if(hexaNbre[i][j]=='6'){
+        hexaInter=6;
+      }
+      if(hexaNbre[i][j]=='7'){
+        hexaInter=7;
+      }
+      if(hexaNbre[i][j]=='8'){
+        hexaInter=8;
+      }
+      if(hexaNbre[i][j]=='9'){
+        hexaInter=9;
+      }
+      if(hexaNbre[i][j]=='A'){
+        hexaInter=10;
+      }
+      if(hexaNbre[i][j]=='B'){
+        hexaInter=11;
+      }
+      if(hexaNbre[i][j]=='C'){
+        hexaInter=12;
+      }
+      if(hexaNbre[i][j]=='D'){
+        hexaInter=13;
+      }
+      if(hexaNbre[i][j]=='E'){
+        hexaInter=14;
+      }
+      if(hexaNbre[i][j]=='F'){
+        hexaInter=15;
+      }
+      if(j==0){
+        hexaInt[i]=hexaInt[i]+(hexaInter*16);
+      }
+      if(j==1){
+        hexaInt[i]=hexaInt[i]+hexaInter;
+      }
+    }
+  }
+  for(int i=0;i<4;++i){
+    int e=128;
+    for(int j=0;j<8;++j){
+      if(hexaInt[i]>=e){
+        trant[j+(i*8)]=1;
+        hexaInt[i]=hexaInt[i]-e;
+      }
+      else{
+        trant[j+(i*8)]=0;
+      }
+      e=e/2;
+    }
+  }
+  int e=128;
+  int expo=0;
+  int exposantFloat;
+  for(int i=1;i<9;++i){
+    if(trant[i]==1){
+      expo=expo+e;
+    }
+    e=e/2;
+  }
+  exposantFloat=expo-127;
+  float partSign=1;
+  float resultat=0.000;
+  for(int i=9;i<32;++i){
+    if(trant[i]==1){
+      partSign=partSign+pow(2,-((i+1)-9));
+    }
+  }
+  resultat=partSign*(pow(2,exposantFloat));
+  number=resultat;
+  return(number);
+}

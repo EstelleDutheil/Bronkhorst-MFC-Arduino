@@ -1,0 +1,98 @@
+/* Liste des trames (read only):
+Identification_string_1=":078004006100600F\r\n"
+Primary_node_address_2=":06800400010001\r\n"
+Secondary_node_address_3=":06800400010002\r\n"
+Next_node_address_4=":06800400010003\r\n"
+Last_node_address_5=":06800400010004\r\"
+Initreset_7=":0680040001000A\r\n"
+Measure_8=":06800401210120\r\n"
+Setpoint_9=":06800401210121\r\n"
+Setpoint_slope_10=":06800401220122\r\n"
+Controle_mode_12=":06800401040104\r\n"
+Polynomial_constant_A_13=":06800401450145\r\n"
+Polynomial_constant_B_14=":06800401460146\r\n"
+Polynomial_constant_C_15=":06800401470147\r\"
+Polynomial_constant_D_16=":06800401480148\r\n"
+Polynomial_constant_E_17=":06800401490149\r\n"
+Polynomial_constant_F_18=":068004014A014A\r\n"
+Polynomial_constant_G_19=":068004014B014B\r\n"
+Polynomial_constant_H_20=":068004014C014C\r\n"
+Capacity_21=":068004014D014D\r\n"
+Capacity_unit_index_23=":068004010F010F\r\n"
+Fluid_number_24=":06800401100110\r\n"
+Fluid_name_25=":078004017101710A\r\n"
+Alarm_info_28=":06800401140114\r\n"
+Actual_counter_value_36=":06800401610060\r\n"
+Signal_input_selection_37=":06800401610061\r\n"
+limit_39=":06800401630163\r\n"
+Delay_time_40=":06800401040104\r\n"
+Duration_time_41=":06800401010105\r\n"
+Readout_unit_45=":078004017F017F07\r\n"
+Reset_unit_47=":068004010C010C\r\n"
+Valve_output_55=":06800472417241\r\n"
+Calibration_mode_58=":06800473017301\r\n"
+IO_status_86=":068004720B720B\r\n"
+Device_type_90=":06800471617161\r\n"
+BHT_Model_number_91=":06800471627162\r\n"
+Serial_number_92=":06800471637163\r\n"
+Customer_model_93=":06800471647164\r\n"
+Firmeware_version_105=":078004716571650B\r\n"
+Reset_114=":06800473087308\r\n" can't read only write
+User_tag_115=":0680047166166\r\n"
+Alarm_limit_maximum_116=":06800461216121\r\n"
+Alarm_mimit_minimum_117=":06800461226122\r\n"
+Alarm_mode_118=":06800461036103\r\n"
+Alarm_output_mode_119=":06800461046104\r\n"
+Alarm_setpoint_mode_120=":06800461056105\r\n"
+Alarm_new_setpoint_121=":06800461266126\r\n"
+Counter_value_122=":06800468416841\r\n"
+Counter_unit_index_123=":06800468026802\r\n"
+Counter_limit_124=":06800468436843\r\n"
+Counter_output_mode_125=":06800468046804\r\n"
+Counter_setpoint_mode_126=":06800468056805\r\n"
+Counter_new_setpoint_127=":06800468266826\r\n"
+Counter_unit_128=":06800468676867\r\n"
+Capacity_unit_129=":078004017F017F07\r\n"
+Counter_mode_130=":06800468086808\r\n"
+Slave_factor_139=":06800421412141\r\n"
+Temperature_142=":06800421472147\r\n"
+Pressure_143=":06800421482148\r\n"
+Reset_alarm_enable_156=":06800461096109\r\n"
+Reset_counter_enable_157=":06800468096809\r\n"
+PID_Kp_167=":06800472557255\r\"
+PID_Ti_168=":06800472567256\r\n"
+PID_Td_169=":06800475577557\r\"
+Density_170=":06800421552155\r\n"
+Alarm_delay_182=":06800461076107\r\n"
+fMeasure_205=":06800421402140\r\n"
+fSetpoint_206=":06800421432143\r\n"
+Density_actual_270=":068004744F744F\r\n"
+Counter_controller_overrun_correction_274=":068004684A684A\r\n"
+Counter_controller_gain_275=":068004684B684B\r\n"
+*/
+#include <SoftwareSerial.h>
+
+SoftwareSerial monPort=SoftwareSerial(8,7);
+
+String Serial_number_92=":06800471637163\r\n";
+String R;
+String maReponse;
+
+void setup() {
+  Serial.begin(9600);
+  monPort.begin(38400);
+}
+
+void loop() {
+  monPort.print(Serial_number_92);
+  R=monPort.readStringUntil('\n');
+  Serial.println(R);
+  maReponse=R.substring(13,31);
+  Serial.println(maReponse);
+  while (true){
+  }
+}
+
+*/ Arduino's serial monitor :
+:3D8002716338393832303331363442000900070006000500040003000200020002
+393832303331363442

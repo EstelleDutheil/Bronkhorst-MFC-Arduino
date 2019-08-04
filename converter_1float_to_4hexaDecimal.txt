@@ -1,0 +1,297 @@
+/* Send a request to MFC and get it as "port_com_tram" does
+Convert a float data with conv_1float_en_4hexa" function.
+Insert the obtained string in the trame
+ */
+
+#include <SoftwareSerial.h>
+
+SoftwareSerial monPort=SoftwareSerial(8,7);
+
+String fSetpoint_206=":088002214300000000\r\n";
+float maValeur=0.00;
+String hexa4;
+ 
+void setup() {
+  Serial.begin(9600);
+  monPort.begin(38400);
+}
+
+void loop() {
+  hexa4=conv_1float_en_4hexa(maValeur);
+  Serial.println(hexa4);
+  for(int i=0;i<8;++i){
+    fSetpoint_206[i+11]=hexa4[i];
+  }
+  Serial.println(fSetpoint_206);
+  monPort.print(fSetpoint_206);
+  while(true){
+  } 
+}
+
+String conv_1float_en_4hexa(float valeur){
+  int valEntier=0;
+  float decimale=0.000;
+  int IEEE_754[]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  int brouillon_IEEE[]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  int brouillon_inter_IEEE[]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  int posBrouillon=31;
+  int posBiais;
+  int devBiais;
+  int Biais;
+  int biais[]={1,1,1,1,1,1,1,1};
+  int posVir;
+  int hexa1=0;
+  int hexa2=0;
+  int hexa3=0;
+  int hexa4=0;
+  int hexa[]={0,0,0,0};
+  String hexaI;
+  String hexaF[]={"00","00","00","00"};
+  String float_hexa;
+  //signe
+  if(maValeur<0){
+    IEEE_754[0]=1;
+  }
+  else{
+    IEEE_754[0]=0;
+  }
+  //ecrire maValeur en binaire dans brouillon_IEEE
+  valEntier=int(maValeur);
+  decimale=maValeur-valEntier;
+    //partie entier
+  if(valEntier==0){
+    brouillon_IEEE[0]=0;
+    brouillon_IEEE[1]=46;
+    posBrouillon=30;
+  }
+  if(valEntier==1){
+    brouillon_IEEE[0]=1;
+    brouillon_IEEE[1]=46;
+    posBrouillon=30;
+  }
+  if(valEntier>1){
+    while(valEntier>=1){
+      if(valEntier%2==1){
+        brouillon_inter_IEEE[posBrouillon]=1;
+      }
+      else{
+        brouillon_inter_IEEE[posBrouillon]=0;
+      }
+      posBrouillon=posBrouillon-1;
+      valEntier=valEntier/2;
+    }
+    for(int i=posBrouillon+1;i<32;++i){
+      brouillon_IEEE[i-(posBrouillon+1)]=brouillon_inter_IEEE[i];
+    }
+    brouillon_IEEE[31-posBrouillon]=46;
+  }
+     //partie décimale
+   decimale=2*decimale;
+   for(int i=(32-posBrouillon);i<32;++i){
+    if(decimale<1){
+      brouillon_IEEE[i]=0;
+      decimale=2*decimale;
+    }
+    else{
+      brouillon_IEEE[i]=1;
+      decimale=(decimale-1)*2;
+    }
+   }
+      //Calcul du biais
+    if(brouillon_IEEE[0]==0){
+      posBiais=2;
+      devBiais=1;
+      while(brouillon_IEEE[posBiais]==0){
+        devBiais=devBiais+1;
+        posBiais=posBiais+1;
+      }
+      Biais=127-devBiais;
+    }
+    if(brouillon_IEEE[0]==1){
+      posBiais=1;
+      devBiais=0;
+      while(brouillon_IEEE[posBiais]!=46){
+        devBiais=devBiais+1;
+        posBiais=posBiais+1;
+      }
+      Biais=127+devBiais;
+    }
+      //Numérisation du biais
+      int e=128;
+      for(int i=0;i<8;++i){
+        if(Biais>=e){
+          biais[i]=1;
+          Biais=Biais-e;
+        }
+        else{
+          biais[i]=0;
+        }
+        e=e/2;
+      }
+        //Introduction du biais exposant dans IEEE_754
+      for(int i=1;i<9;++i){
+        IEEE_754[i]=biais[i-1];
+      }
+        //Introduction de la mantise dans IEEE_754
+      if(brouillon_IEEE[0]==0){
+        posVir=1;
+        while(brouillon_IEEE[posVir]!=1){
+          posVir=posVir+1; 
+        }
+      for(int i=9;i<32;++i){
+        IEEE_754[i]=brouillon_IEEE[posVir+1+(i-9)];
+      }
+      }
+      if(brouillon_IEEE[0]==1){
+        posVir=1;
+        while(brouillon_IEEE[posVir]!=46){
+          posVir=posVir+1;
+        }
+        for (int i=posVir;i<32;++i){
+          brouillon_IEEE[i]=brouillon_IEEE[i+1];
+        }
+        for(int i=9;i<32;++i){
+          IEEE_754[i]=brouillon_IEEE[i-8];
+        }
+      }
+      //conversion des 32 bits en 4 hexa
+      e=128;
+      for(int i=0;i<8;++i){
+        if(IEEE_754[i]==1){
+          hexa1=hexa1+e;  
+        }
+        e=e/2;
+      }
+      e=128;
+      for(int i=8;i<16;++i){
+        if(IEEE_754[i]==1){
+          hexa2=hexa2+e;
+        }
+        e=e/2;
+      }
+      e=128;
+      for(int i=16;i<24;++i){
+        if(IEEE_754[i]==1){
+          hexa3=hexa3+e;
+        }
+        e=e/2;
+      }
+      e=128;
+      for(int i=24;i<32;++i){
+        if(IEEE_754[i]==1){
+          hexa4=hexa4+e;
+        }
+        e=e/2;
+      }
+      hexa[0]=hexa1;
+      hexa[1]=hexa2;
+      hexa[2]=hexa3;
+      hexa[3]=hexa4;
+      int nbreHex;
+      for(int i=0;i<4;++i){
+        nbreHex=hexa[i]/16;
+        if(nbreHex==0){
+          hexaI="0";
+        }
+        if(nbreHex==1){
+          hexaI="1";
+        }
+        if(nbreHex==2){
+          hexaI="2";
+        }
+        if(nbreHex==3){
+          hexaI="3";
+        }
+        if(nbreHex==4){
+          hexaI="4";
+        }
+        if(nbreHex==5){
+          hexaI="5";
+        }
+        if(nbreHex==6){
+          hexaI="6";
+        }
+        if(nbreHex==7){
+          hexaI="7";
+        }
+        if(nbreHex==8){
+          hexaI="8";
+        }
+        if(nbreHex==9){
+          hexaI="9";
+        }
+        if(nbreHex==10){
+          hexaI="A";
+        }
+        if(nbreHex==11){
+          hexaI="B";
+        }
+        if(nbreHex==12){
+          hexaI="C";
+        }
+        if(nbreHex==13){
+          hexaI="D";
+        }
+        if(nbreHex==14){
+          hexaI="E";
+        }
+        if(nbreHex==15){
+          hexaI="F";
+        }
+      
+      nbreHex=hexa[i]-(nbreHex*16);
+      if(nbreHex==0){
+        hexaI=hexaI+"0";
+      }
+      if(nbreHex==1){
+        hexaI=hexaI+"1";
+      }
+      if(nbreHex==2){
+        hexaI=hexaI+"2";
+      }
+      if(nbreHex==3){
+        hexaI=hexaI+"3";
+      }
+      if(nbreHex==4){
+        hexaI=hexaI+"4";
+      }
+      if(nbreHex==5){
+        hexaI=hexaI+"5";
+      }
+      if(nbreHex==6){
+        hexaI=hexaI+"6";
+      }
+      if(nbreHex==7){
+        hexaI=hexaI+"7";
+      }
+      if(nbreHex==8){
+        hexaI=hexaI+"8";
+      }
+      if(nbreHex==9){
+        hexaI=hexaI+"9";
+      }
+      if(nbreHex==10){
+        hexaI=hexaI+"A";
+      }
+      if(nbreHex==11){
+        hexaI=hexaI+"B";
+      }
+      if(nbreHex==12){
+        hexaI=hexaI+"C";
+      }
+      if(nbreHex==13){
+        hexaI=hexaI+"D";
+      }
+      if(nbreHex==14){
+        hexaI=hexaI+"E";
+      }
+      if(nbreHex==15){
+        hexaI=hexaI+"F";
+      }
+      hexaF[i]=hexaI;
+      }
+      for(int i=0;i<4;++i){
+        float_hexa=float_hexa+hexaF[i];
+      }
+      return(float_hexa);
+}
