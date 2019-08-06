@@ -48,6 +48,10 @@ String conv_1float_en_4hexa(float valeur){
   String hexaI;
   String hexaF[]={"00","00","00","00"};
   String float_hexa;
+  if(maValeur==0.00){
+    float_hexa="00000000";
+  }
+  else{
   //signe
   if(maValeur<0){
     IEEE_754[0]=1;
@@ -292,6 +296,7 @@ String conv_1float_en_4hexa(float valeur){
       }
       for(int i=0;i<4;++i){
         float_hexa=float_hexa+hexaF[i];
+      }
       }
       return(float_hexa);
 }
